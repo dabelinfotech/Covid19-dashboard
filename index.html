@@ -1,0 +1,1274 @@
+﻿<title>COVID-19 Mortality Analysis Â· Jan 2020 â€“ Apr 2021</title>
+<style>
+:root {
+  --ground: #060b14;
+  --surface: #0c1422;
+  --surface-2: #101c2e;
+  --border: #1c2d44;
+  --border-dim: #132030;
+  --text: #d8e8f5;
+  --text-dim: #7fa5c4;
+  --text-muted: #3f5d7a;
+  --accent: #b53028;
+  --accent-hi: #d44040;
+  --accent-glow: rgba(181,48,40,0.14);
+  --amber: #d4891a;
+  --blue: #2a7fc4;
+  --mono: 'Consolas','Courier New',monospace;
+  --sans: 'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--ground);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.5;min-height:100vh;overflow-x:hidden}
+
+/* â”€â”€ Layout â”€â”€ */
+.wrap{max-width:1320px;margin:0 auto;padding:48px 40px 96px}
+
+/* â”€â”€ Hairline grid overlay â”€â”€ */
+.wrap::before{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(90deg,rgba(28,45,68,.06) 0,rgba(28,45,68,.06) 1px,transparent 1px,transparent 80px);
+  pointer-events:none;z-index:0
+}
+.wrap>*{position:relative;z-index:1}
+
+/* â”€â”€ Header â”€â”€ */
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:56px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.hdr-left{display:flex;flex-direction:column;gap:4px}
+.hdr-eyebrow{font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--text-muted)}
+.hdr-title{font-family:var(--sans);font-size:15px;font-weight:600;color:var(--text-dim);letter-spacing:.02em}
+.hdr-badge{font-family:var(--mono);font-size:11px;color:var(--amber);background:rgba(212,137,26,.08);border:1px solid rgba(212,137,26,.22);padding:5px 12px;letter-spacing:.04em}
+.hdr-right{display:flex;align-items:center;gap:12px}
+.hdr-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hdr-status{font-family:var(--mono);font-size:10px;color:var(--text-muted);letter-spacing:.08em}
+.dl-btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--text);background:transparent;border:1px solid var(--accent);padding:7px 14px;cursor:pointer;transition:background .15s,color .15s;text-decoration:none;white-space:nowrap}
+.dl-btn:hover{background:var(--accent);color:#fff}
+.dl-btn:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.dl-btn svg{flex-shrink:0}
+
+/* â”€â”€ Hero â”€â”€ */
+.hero{margin-bottom:48px}
+.hero-number{font-family:var(--mono);font-size:clamp(64px,7.5vw,104px);font-weight:700;color:var(--text);letter-spacing:-.03em;line-height:1;margin-bottom:14px}
+.hero-number em{color:var(--accent);font-style:normal}
+.hero-label{font-size:10px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px}
+.hero-meta{font-family:var(--mono);font-size:13px;color:var(--text-dim);display:flex;flex-wrap:wrap;gap:0 24px}
+.hero-meta span{white-space:nowrap}
+.hero-meta .pipe{color:var(--border)}
+
+/* â”€â”€ KPI row â”€â”€ */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);background:var(--border);gap:1px;border:1px solid var(--border);margin-bottom:48px}
+.kpi{background:var(--surface);padding:22px 26px}
+.kpi-lbl{font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px}
+.kpi-val{font-family:var(--mono);font-size:clamp(22px,2.5vw,30px);font-weight:700;line-height:1;margin-bottom:6px}
+.kpi-val.red{color:var(--accent)}
+.kpi-val.amber{color:var(--amber)}
+.kpi-val.blue{color:var(--blue)}
+.kpi-val.dim{color:var(--text)}
+.kpi-sub{font-family:var(--mono);font-size:10px;color:var(--text-muted);letter-spacing:.03em}
+
+/* â”€â”€ Section headers â”€â”€ */
+.sec-hdr{display:flex;align-items:baseline;gap:12px;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--border-dim)}
+.sec-hdr-text{font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--text-muted)}
+.sec-hdr-note{font-family:var(--mono);font-size:10px;color:var(--text-muted)}
+
+/* â”€â”€ Two-column charts â”€â”€ */
+.charts-duo{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:40px}
+.chart-card{background:var(--surface);border:1px solid var(--border);padding:24px 28px}
+canvas{display:block;width:100%!important}
+
+/* â”€â”€ Full-width trend â”€â”€ */
+.chart-full{background:var(--surface);border:1px solid var(--border);padding:28px 28px 20px;margin-bottom:40px}
+.chart-full canvas{width:100%!important}
+
+/* â”€â”€ Bottom row â”€â”€ */
+.bottom-duo{display:grid;grid-template-columns:1.15fr 1fr;gap:32px;margin-bottom:56px}
+
+/* â”€â”€ Death rate table â”€â”€ */
+.rate-wrap{background:var(--surface);border:1px solid var(--border);padding:0;overflow:hidden}
+.rate-table{width:100%;border-collapse:collapse}
+.rate-table th{font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);padding:14px 16px;text-align:left;border-bottom:1px solid var(--border);background:var(--surface-2)}
+.rate-table td{padding:10px 16px;border-bottom:1px solid var(--border-dim);vertical-align:middle}
+.rate-table tr:last-child td{border-bottom:none}
+.rate-table td.country{font-family:var(--sans);font-size:13px;color:var(--text);font-weight:500}
+.rate-table td.deaths{font-family:var(--mono);font-size:12px;color:var(--accent)}
+.rate-table td.rate-cell{width:180px}
+.rate-bar-row{display:flex;align-items:center;gap:8px}
+.rate-pct{font-family:var(--mono);font-size:12px;color:var(--amber);font-weight:700;min-width:38px;text-align:right}
+.rate-track{flex:1;height:5px;background:var(--border);border-radius:1px;overflow:hidden}
+.rate-fill{height:100%;background:var(--amber);border-radius:1px;transform-origin:left;animation:grow .8s ease forwards}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion:reduce){.rate-fill{animation:none}}
+
+/* â”€â”€ Insights panel â”€â”€ */
+.insights{background:var(--surface);border:1px solid var(--border);padding:0;overflow:hidden}
+.ins-inner{padding:20px 24px}
+.ins-item{padding:13px 0;border-bottom:1px solid var(--border-dim)}
+.ins-item:first-child{padding-top:0}
+.ins-item:last-child{border-bottom:none;padding-bottom:0}
+.ins-tag{font-size:8px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+.ins-body{font-size:12.5px;color:var(--text-dim);line-height:1.6}
+.ins-body strong{color:var(--text)}
+.ins-body .hi{color:var(--accent)}
+
+/* â”€â”€ Power Query section â”€â”€ */
+.pq-wrap{border-top:1px solid var(--border);padding-top:48px}
+.pq-eyebrow{font-size:9px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--text-muted);margin-bottom:28px;display:flex;align-items:center;gap:12px}
+.pq-eyebrow::after{content:'';flex:1;height:1px;background:var(--border-dim)}
+.pq-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.pq-block{border:1px solid var(--border)}
+.pq-block-hdr{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:var(--surface-2);border-bottom:1px solid var(--border);cursor:pointer;user-select:none}
+.pq-block-title{font-family:var(--mono);font-size:12px;color:var(--amber);letter-spacing:.03em}
+.pq-block-toggle{font-family:var(--mono);font-size:10px;color:var(--text-muted);transition:transform .2s}
+.pq-block.open .pq-block-toggle{transform:rotate(45deg)}
+.pq-code{display:none;padding:18px 16px;font-family:var(--mono);font-size:11.5px;line-height:1.75;overflow-x:auto;background:var(--ground);border-left:3px solid var(--accent)}
+.pq-block.open .pq-code{display:block}
+/* M language tokens */
+.kw{color:#569cd6}.fn{color:#dcdcaa}.str{color:#ce9178}.cmt{color:#3f5d7a;font-style:italic}.ty{color:#4ec9b0}.nm{color:#9cdcfe}.op{color:#d4d4d4}.nb{color:#b5cea8}
+
+/* â”€â”€ Footer â”€â”€ */
+.foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border-dim);padding-top:24px;margin-top:0}
+.foot-txt{font-family:var(--mono);font-size:10px;color:var(--text-muted)}
+
+/* â”€â”€ Responsive â”€â”€ */
+@media(max-width:1000px){.charts-duo,.bottom-duo{grid-template-columns:1fr}.pq-grid{grid-template-columns:1fr}}
+@media(max-width:720px){.kpi-row{grid-template-columns:repeat(2,1fr)}.wrap{padding:32px 20px 64px}}
+@media(max-width:480px){.kpi-row{grid-template-columns:1fr}.hero-number{font-size:52px}}
+</style>
+
+<div class="wrap">
+
+  <!-- Header -->
+  <header class="hdr">
+    <div class="hdr-left">
+      <span class="hdr-eyebrow">Global Health Intelligence</span>
+      <span class="hdr-title">COVID-19 Mortality Analysis</span>
+    </div>
+    <div class="hdr-right">
+      <span class="hdr-dot"></span>
+      <span class="hdr-status">85,172 RECORDS Â· 59 VARIABLES</span>
+      <div class="hdr-badge">JAN 2020 â€” APR 2021</div>
+      <button class="dl-btn" onclick="downloadXLSX()" title="Download COVID-19 Dashboard Data as Excel workbook">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+          <path d="M6.5 1v7M4 6l2.5 2.5L9 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 10.5h9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        DOWNLOAD XLSX
+      </button>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-label">Confirmed deaths recorded</div>
+    <div class="hero-number">3,<em>180</em>,223</div>
+    <div class="hero-meta">
+      <span>151,398,759 confirmed cases</span>
+      <span class="pipe">|</span>
+      <span>2.10% case fatality rate</span>
+      <span class="pipe">|</span>
+      <span>185+ countries &amp; territories</span>
+      <span class="pipe">|</span>
+      <span>15 months of data</span>
+    </div>
+  </section>
+
+  <!-- KPI row -->
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-lbl">Deadliest Month</div>
+      <div class="kpi-val red">411,021</div>
+      <div class="kpi-sub">Jan 2021 Â· 2nd wave peak</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-lbl">Highest CFR Country</div>
+      <div class="kpi-val amber">9.25%</div>
+      <div class="kpi-sub">Mexico Â· 216,907 deaths</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-lbl">Most Affected Continent</div>
+      <div class="kpi-val red">Europe</div>
+      <div class="kpi-sub">1,016,750 deaths Â· 32% of global</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-lbl">Leading Country</div>
+      <div class="kpi-val dim">USA</div>
+      <div class="kpi-sub">576,232 deaths Â· 18.1% of global</div>
+    </div>
+  </div>
+
+  <!-- Continent + Countries charts -->
+  <div class="charts-duo">
+    <div class="chart-card">
+      <div class="sec-hdr">
+        <span class="sec-hdr-text">Deaths by Continent</span>
+        <span class="sec-hdr-note">cumulative total</span>
+      </div>
+      <canvas id="cContinent" style="height:292px"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="sec-hdr">
+        <span class="sec-hdr-text">Top 10 Countries</span>
+        <span class="sec-hdr-note">by total deaths</span>
+      </div>
+      <canvas id="cCountries" style="height:292px"></canvas>
+    </div>
+  </div>
+
+  <!-- Continent Share of Global Deaths -->
+  <div class="charts-duo">
+    <div class="chart-card">
+      <div class="sec-hdr">
+        <span class="sec-hdr-text">Continent Share of Global Deaths</span>
+        <span class="sec-hdr-note">% of 3.18M total deaths</span>
+      </div>
+      <canvas id="cDeathShare" style="height:292px"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="sec-hdr">
+        <span class="sec-hdr-text">Case Fatality Rate by Country</span>
+        <span class="sec-hdr-note">deaths &divide; confirmed cases &times; 100</span>
+      </div>
+      <canvas id="cCFR" style="height:292px"></canvas>
+    </div>
+  </div>
+
+  <!-- Country Cases vs Deaths -->
+  <div class="chart-full">
+    <div class="sec-hdr">
+      <span class="sec-hdr-text">Top 10 Countries &mdash; Total Cases vs Total Deaths</span>
+      <span class="sec-hdr-note">grouped comparison &middot; cases on left axis &middot; deaths on right axis</span>
+    </div>
+    <canvas id="cCountryCases" style="height:270px"></canvas>
+  </div>
+
+  <!-- Cases vs Deaths by Continent -->
+  <div class="chart-full">
+    <div class="sec-hdr">
+      <span class="sec-hdr-text">Total Cases vs Total Deaths by Continent</span>
+      <span class="sec-hdr-note">grouped comparison &middot; cases on left axis &middot; deaths on right axis</span>
+    </div>
+    <canvas id="cCasesDeath" style="height:260px"></canvas>
+  </div>
+
+  <!-- Monthly trend -->
+  <div class="chart-full">
+    <div class="sec-hdr">
+      <span class="sec-hdr-text">Monthly Global Death Toll</span>
+      <span class="sec-hdr-note">new deaths per month Â· Jan 2020 â€“ Apr 2021</span>
+    </div>
+    <canvas id="cMonthly" style="height:230px"></canvas>
+  </div>
+
+  <!-- Table + Insights -->
+  <div class="bottom-duo">
+    <div class="rate-wrap">
+      <div class="sec-hdr" style="padding:16px 16px 10px;margin-bottom:0">
+        <span class="sec-hdr-text">Case Fatality Rate â€” Top 10</span>
+        <span class="sec-hdr-note">deaths Ã· confirmed cases</span>
+      </div>
+      <table class="rate-table">
+        <thead>
+          <tr>
+            <th>Country</th>
+            <th>Deaths</th>
+            <th>CFR</th>
+          </tr>
+        </thead>
+        <tbody id="rateTableBody"></tbody>
+      </table>
+    </div>
+    <div class="insights">
+      <div class="sec-hdr" style="padding:16px 24px 10px;margin-bottom:0">
+        <span class="sec-hdr-text">Key Findings</span>
+      </div>
+      <div class="ins-inner">
+        <div class="ins-item">
+          <div class="ins-tag">Scale</div>
+          <div class="ins-body"><strong>Europe led deaths despite smaller population.</strong> With 1.02M deaths, Europe outpaced more populous regions â€” North America's 847K and Asia's 520K â€” driven by early spread, ageing populations, and healthcare capacity strain.</div>
+        </div>
+        <div class="ins-item">
+          <div class="ins-tag">Mortality Rate Paradox</div>
+          <div class="ins-body"><strong>Mexico's 9.25% CFR</strong> is nearly <span class="hi">5Ã— the global average</span>. This reflects severe case undercounting rather than a uniquely lethal strain â€” a systematic gap between recorded cases and true infections.</div>
+        </div>
+        <div class="ins-item">
+          <div class="ins-tag">Wave Structure</div>
+          <div class="ins-body"><strong>January 2021 peaked at 411,021 deaths</strong> â€” the second wave was 2.1Ã— deadlier than the first (April 2020: 192,885). The third wave (Apr 2021: 364,156) showed no sign of abating at the dataset's end.</div>
+        </div>
+        <div class="ins-item">
+          <div class="ins-tag">Burden</div>
+          <div class="ins-body">The <strong>United States alone carried 18.1%</strong> of all recorded global deaths â€” more than all of Asia combined â€” despite representing â‰ˆ4.2% of world population.</div>
+        </div>
+        <div class="ins-item">
+          <div class="ins-tag">Africa &amp; Oceania</div>
+          <div class="ins-body">Africa's 121,784 deaths (3.8% of global) and Oceania's 1,046 likely reflect <strong>significant undercounting</strong> rather than genuine immunity â€” testing infrastructure gaps mask the true burden in low-income regions.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Power Query M code -->
+  <div class="pq-wrap">
+    <div class="pq-eyebrow">Power Query M Â· Source Syntax</div>
+    <div class="pq-grid">
+
+      <div class="pq-block open">
+        <div class="pq-block-hdr" onclick="this.parentElement.classList.toggle('open')">
+          <span class="pq-block-title">// Query 1 â€” CovidDeaths_Cleaned</span>
+          <span class="pq-block-toggle">+</span>
+        </div>
+        <pre class="pq-code"><span class="cmt">// Load, type, filter, and enrich the source data</span>
+<span class="kw">let</span>
+  <span class="nm">Source</span> <span class="op">=</span> <span class="fn">Excel.Workbook</span>(
+      <span class="fn">File.Contents</span>(<span class="str">"D:\New folder\DATA PROJECT 2024\New folder (2)\CovidDeaths.xlsx"</span>),
+      <span class="kw">null</span>, <span class="kw">true</span>),
+
+  <span class="nm">Sheet</span>       <span class="op">=</span> <span class="nm">Source</span>{[<span class="nm">Item</span><span class="op">=</span><span class="str">"Sheet1"</span>,<span class="nm">Kind</span><span class="op">=</span><span class="str">"Sheet"</span>]}[<span class="nm">Data</span>],
+  <span class="nm">Headers</span>     <span class="op">=</span> <span class="fn">Table.PromoteHeaders</span>(<span class="nm">Sheet</span>, [<span class="nm">PromoteAllScalars</span><span class="op">=</span><span class="kw">true</span>]),
+
+  <span class="nm">TypedData</span>   <span class="op">=</span> <span class="fn">Table.TransformColumnTypes</span>(<span class="nm">Headers</span>, {
+      {<span class="str">"iso_code"</span>, <span class="ty">type text</span>},   {<span class="str">"continent"</span>, <span class="ty">type text</span>},
+      {<span class="str">"location"</span>, <span class="ty">type text</span>},   {<span class="str">"date"</span>, <span class="ty">type date</span>},
+      {<span class="str">"total_cases"</span>, <span class="ty">Int64.Type</span>}, {<span class="str">"new_cases"</span>, <span class="ty">Int64.Type</span>},
+      {<span class="str">"total_deaths"</span>, <span class="ty">Int64.Type</span>},{<span class="str">"new_deaths"</span>, <span class="ty">Int64.Type</span>},
+      {<span class="str">"total_deaths_per_million"</span>, <span class="ty">type number</span>},
+      {<span class="str">"population"</span>, <span class="ty">Int64.Type</span>}}),
+
+  <span class="cmt">// Remove continent-level aggregate rows (no iso continent code)</span>
+  <span class="nm">FilteredRows</span>  <span class="op">=</span> <span class="fn">Table.SelectRows</span>(<span class="nm">TypedData</span>, <span class="kw">each</span>
+      [<span class="nm">continent</span>] <span class="op">&lt;&gt;</span> <span class="kw">null</span> <span class="kw">and</span> [<span class="nm">continent</span>] <span class="op">&lt;&gt;</span> <span class="str">""</span>),
+
+  <span class="nm">YearMonth</span>   <span class="op">=</span> <span class="fn">Table.AddColumn</span>(<span class="nm">FilteredRows</span>, <span class="str">"YearMonth"</span>,
+      <span class="kw">each</span> <span class="fn">Date.ToText</span>([<span class="nm">date</span>], <span class="str">"yyyy-MM"</span>), <span class="ty">type text</span>),
+  <span class="nm">Year</span>        <span class="op">=</span> <span class="fn">Table.AddColumn</span>(<span class="nm">YearMonth</span>, <span class="str">"Year"</span>,
+      <span class="kw">each</span> <span class="fn">Date.Year</span>([<span class="nm">date</span>]), <span class="ty">Int64.Type</span>),
+  <span class="nm">MonthNum</span>    <span class="op">=</span> <span class="fn">Table.AddColumn</span>(<span class="nm">Year</span>, <span class="str">"MonthNum"</span>,
+      <span class="kw">each</span> <span class="fn">Date.Month</span>([<span class="nm">date</span>]), <span class="ty">Int64.Type</span>),
+  <span class="nm">CFR</span>         <span class="op">=</span> <span class="fn">Table.AddColumn</span>(<span class="nm">MonthNum</span>, <span class="str">"CFR_Percent"</span>,
+      <span class="kw">each</span> <span class="kw">if</span> [<span class="nm">total_cases</span>] <span class="op">&lt;&gt;</span> <span class="kw">null</span> <span class="kw">and</span> [<span class="nm">total_cases</span>] <span class="op">&gt;</span> <span class="nb">0</span>
+           <span class="kw">then</span> <span class="fn">Number.Round</span>(([<span class="nm">total_deaths</span>] <span class="op">/</span> [<span class="nm">total_cases</span>]) <span class="op">*</span> <span class="nb">100</span>, <span class="nb">2</span>)
+           <span class="kw">else</span> <span class="kw">null</span>, <span class="ty">type number</span>)
+<span class="kw">in</span>
+  <span class="nm">CFR</span></pre>
+      </div>
+
+      <div class="pq-block">
+        <div class="pq-block-hdr" onclick="this.parentElement.classList.toggle('open')">
+          <span class="pq-block-title">// Query 2 â€” Deaths_By_Continent</span>
+          <span class="pq-block-toggle">+</span>
+        </div>
+        <pre class="pq-code"><span class="cmt">// Max deaths per country, then sum by continent</span>
+<span class="kw">let</span>
+  <span class="nm">Source</span>     <span class="op">=</span> <span class="nm">CovidDeaths_Cleaned</span>,
+
+  <span class="cmt">// Get peak total_deaths per country (last non-null row)</span>
+  <span class="nm">ByCountry</span>  <span class="op">=</span> <span class="fn">Table.Group</span>(<span class="nm">Source</span>,
+      {<span class="str">"continent"</span>, <span class="str">"location"</span>}, {
+      {<span class="str">"MaxDeaths"</span>, <span class="kw">each</span> <span class="fn">List.Max</span>([<span class="nm">total_deaths</span>]), <span class="ty">type number</span>},
+      {<span class="str">"MaxCases"</span>,  <span class="kw">each</span> <span class="fn">List.Max</span>([<span class="nm">total_cases</span>]),  <span class="ty">type number</span>}}),
+
+  <span class="cmt">// Aggregate to continent level</span>
+  <span class="nm">ByCont</span>     <span class="op">=</span> <span class="fn">Table.Group</span>(<span class="nm">ByCountry</span>, {<span class="str">"continent"</span>}, {
+      {<span class="str">"TotalDeaths"</span>, <span class="kw">each</span> <span class="fn">List.Sum</span>([<span class="nm">MaxDeaths</span>]), <span class="ty">type number</span>},
+      {<span class="str">"TotalCases"</span>,  <span class="kw">each</span> <span class="fn">List.Sum</span>([<span class="nm">MaxCases</span>]),  <span class="ty">type number</span>}}),
+
+  <span class="nm">WithShare</span>  <span class="op">=</span> <span class="fn">Table.AddColumn</span>(<span class="nm">ByCont</span>, <span class="str">"DeathShare_Pct"</span>,
+      <span class="kw">each</span> <span class="fn">Number.Round</span>([<span class="nm">TotalDeaths</span>] <span class="op">/</span> <span class="nb">3180223</span> <span class="op">*</span> <span class="nb">100</span>, <span class="nb">1</span>),
+      <span class="ty">type number</span>),
+
+  <span class="nm">Sorted</span>     <span class="op">=</span> <span class="fn">Table.Sort</span>(<span class="nm">WithShare</span>,
+      {{<span class="str">"TotalDeaths"</span>, <span class="fn">Order.Descending</span>}})
+<span class="kw">in</span>
+  <span class="nm">Sorted</span></pre>
+      </div>
+
+      <div class="pq-block">
+        <div class="pq-block-hdr" onclick="this.parentElement.classList.toggle('open')">
+          <span class="pq-block-title">// Query 3 â€” Top10_Countries</span>
+          <span class="pq-block-toggle">+</span>
+        </div>
+        <pre class="pq-code"><span class="cmt">// Ranked country table with CFR and deaths per million</span>
+<span class="kw">let</span>
+  <span class="nm">Source</span>    <span class="op">=</span> <span class="nm">CovidDeaths_Cleaned</span>,
+
+  <span class="nm">ByCountry</span> <span class="op">=</span> <span class="fn">Table.Group</span>(<span class="nm">Source</span>,
+      {<span class="str">"location"</span>, <span class="str">"continent"</span>}, {
+      {<span class="str">"TotalDeaths"</span>,    <span class="kw">each</span> <span class="fn">List.Max</span>([<span class="nm">total_deaths</span>]),           <span class="ty">type number</span>},
+      {<span class="str">"TotalCases"</span>,     <span class="kw">each</span> <span class="fn">List.Max</span>([<span class="nm">total_cases</span>]),            <span class="ty">type number</span>},
+      {<span class="str">"DeathsPerMil"</span>,   <span class="kw">each</span> <span class="fn">List.Max</span>([<span class="nm">total_deaths_per_million</span>]),<span class="ty">type number</span>},
+      {<span class="str">"Population"</span>,     <span class="kw">each</span> <span class="fn">List.Max</span>([<span class="nm">population</span>]),             <span class="ty">type number</span>}}),
+
+  <span class="nm">WithCFR</span>   <span class="op">=</span> <span class="fn">Table.AddColumn</span>(<span class="nm">ByCountry</span>, <span class="str">"CFR_Pct"</span>,
+      <span class="kw">each</span> <span class="kw">if</span> [<span class="nm">TotalCases</span>] <span class="op">&gt;</span> <span class="nb">0</span>
+           <span class="kw">then</span> <span class="fn">Number.Round</span>([<span class="nm">TotalDeaths</span>] <span class="op">/</span> [<span class="nm">TotalCases</span>] <span class="op">*</span> <span class="nb">100</span>, <span class="nb">2</span>)
+           <span class="kw">else</span> <span class="kw">null</span>, <span class="ty">type number</span>),
+
+  <span class="nm">Sorted</span>    <span class="op">=</span> <span class="fn">Table.Sort</span>(<span class="nm">WithCFR</span>,
+      {{<span class="str">"TotalDeaths"</span>, <span class="fn">Order.Descending</span>}}),
+
+  <span class="nm">Top10</span>     <span class="op">=</span> <span class="fn">Table.FirstN</span>(<span class="nm">Sorted</span>, <span class="nb">10</span>)
+<span class="kw">in</span>
+  <span class="nm">Top10</span></pre>
+      </div>
+
+      <div class="pq-block">
+        <div class="pq-block-hdr" onclick="this.parentElement.classList.toggle('open')">
+          <span class="pq-block-title">// Query 4 â€” Monthly_Trend</span>
+          <span class="pq-block-toggle">+</span>
+        </div>
+        <pre class="pq-code"><span class="cmt">// Global monthly death totals for time-series chart</span>
+<span class="kw">let</span>
+  <span class="nm">Source</span>     <span class="op">=</span> <span class="nm">CovidDeaths_Cleaned</span>,
+
+  <span class="nm">ByMonth</span>    <span class="op">=</span> <span class="fn">Table.Group</span>(<span class="nm">Source</span>, {<span class="str">"YearMonth"</span>, <span class="str">"Year"</span>, <span class="str">"MonthNum"</span>}, {
+      {<span class="str">"MonthlyDeaths"</span>, <span class="kw">each</span> <span class="fn">List.Sum</span>([<span class="nm">new_deaths</span>]), <span class="ty">type number</span>},
+      {<span class="str">"MonthlyCases"</span>,  <span class="kw">each</span> <span class="fn">List.Sum</span>([<span class="nm">new_cases</span>]),  <span class="ty">type number</span>}}),
+
+  <span class="nm">WithMoM</span>    <span class="op">=</span> <span class="fn">Table.AddColumn</span>(<span class="nm">ByMonth</span>, <span class="str">"MonthLabel"</span>,
+      <span class="kw">each</span> <span class="fn">Date.MonthName</span>(#<span class="fn">date</span>([<span class="nm">Year</span>], [<span class="nm">MonthNum</span>], <span class="nb">1</span>)) <span class="op">&amp;</span>
+           <span class="str">" '"</span> <span class="op">&amp;</span> <span class="fn">Text.End</span>(<span class="fn">Text.From</span>([<span class="nm">Year</span>]), <span class="nb">2</span>),
+      <span class="ty">type text</span>),
+
+  <span class="nm">Sorted</span>     <span class="op">=</span> <span class="fn">Table.Sort</span>(<span class="nm">WithMoM</span>,
+      {{<span class="str">"Year"</span>, <span class="fn">Order.Ascending</span>},{<span class="str">"MonthNum"</span>, <span class="fn">Order.Ascending</span>}}),
+
+  <span class="cmt">// Add cumulative running total</span>
+  <span class="nm">IdxAdded</span>   <span class="op">=</span> <span class="fn">Table.AddIndexColumn</span>(<span class="nm">Sorted</span>, <span class="str">"Idx"</span>, <span class="nb">0</span>, <span class="nb">1</span>),
+  <span class="nm">Cumulative</span> <span class="op">=</span> <span class="fn">Table.AddColumn</span>(<span class="nm">IdxAdded</span>, <span class="str">"CumulativeDeaths"</span>, <span class="kw">each</span>
+      <span class="fn">List.Sum</span>(<span class="fn">List.FirstN</span>(<span class="nm">Sorted</span>[<span class="nm">MonthlyDeaths</span>], [<span class="nm">Idx</span>] <span class="op">+</span> <span class="nb">1</span>)), <span class="ty">type number</span>)
+<span class="kw">in</span>
+  <span class="nm">Cumulative</span></pre>
+      </div>
+
+    </div><!-- /pq-grid -->
+  </div><!-- /pq-wrap -->
+
+  <!-- Footer -->
+  <div class="foot" style="margin-top:48px">
+    <span class="foot-txt">Source: Our World in Data Â· CovidDeaths.xlsx Â· 85,172 rows Â· 59 columns</span>
+    <span class="foot-txt">Analysis period: 24 Feb 2020 â€“ 30 Apr 2021</span>
+  </div>
+
+</div><!-- /wrap -->
+
+<script>
+// â”€â”€ Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const D = {
+  continents: [
+    {n:'Europe',       v:1016750},
+    {n:'N. America',   v:847942},
+    {n:'S. America',   v:672415},
+    {n:'Asia',         v:520286},
+    {n:'Africa',       v:121784},
+    {n:'Oceania',      v:1046},
+  ],
+  countries: [
+    {n:'United States', v:576232, r:1.78},
+    {n:'Brazil',        v:403781, r:2.75},
+    {n:'Mexico',        v:216907, r:9.25},
+    {n:'India',         v:211853, r:1.11},
+    {n:'United Kingdom',v:127775, r:2.88},
+    {n:'Italy',         v:120807, r:3.00},
+    {n:'Russia',        v:108290, r:2.28},
+    {n:'France',        v:104675, r:1.84},
+    {n:'Germany',       v:83097,  r:2.44},
+    {n:'Spain',         v:78216,  r:2.22},
+  ],
+  monthly: [
+    {m:"Jan '20",v:196},   {m:"Feb '20",v:2723},  {m:"Mar '20",v:41581},
+    {m:"Apr '20",v:192885},{m:"May '20",v:137618}, {m:"Jun '20",v:133145},
+    {m:"Jul '20",v:167327},{m:"Aug '20",v:175564}, {m:"Sep '20",v:163905},
+    {m:"Oct '20",v:181802},{m:"Nov '20",v:274821}, {m:"Dec '20",v:353343},
+    {m:"Jan '21",v:411021},{m:"Feb '21",v:297465}, {m:"Mar '21",v:282654},
+    {m:"Apr '21",v:364156},
+  ],
+  cfr: [
+    {n:'Mexico',        v:216907, r:9.25},
+    {n:'Italy',         v:120807, r:3.00},
+    {n:'United Kingdom',v:127775, r:2.88},
+    {n:'Brazil',        v:403781, r:2.75},
+    {n:'Germany',       v:83097,  r:2.44},
+    {n:'Russia',        v:108290, r:2.28},
+    {n:'Spain',         v:78216,  r:2.22},
+    {n:'France',        v:104675, r:1.84},
+    {n:'United States', v:576232, r:1.78},
+    {n:'India',         v:211853, r:1.11},
+  ]
+};
+
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function fmt(n) {
+  if (n >= 1e6) return (n/1e6).toFixed(2)+'M';
+  if (n >= 1e5) return (n/1000).toFixed(0)+'K';
+  if (n >= 1e3) return (n/1000).toFixed(1)+'K';
+  return n.toString();
+}
+function fmtFull(n) { return n.toLocaleString('en-US'); }
+
+function niceMax(v) {
+  const e = Math.pow(10, Math.floor(Math.log10(v)));
+  const c = v / e;
+  const nice = c <= 1.5 ? 1.5 : c <= 2 ? 2 : c <= 2.5 ? 2.5 : c <= 5 ? 5 : 10;
+  return nice * e;
+}
+
+function setupCanvas(canvas) {
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  const w = rect.width;
+  const h = rect.height;
+  canvas.width  = Math.round(w * dpr);
+  canvas.height = Math.round(h * dpr);
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  return {ctx, w, h};
+}
+
+// â”€â”€ Chart 1: Deaths by Continent (vertical bars) â”€â”€â”€â”€â”€â”€â”€â”€
+function drawContinent() {
+  const el = document.getElementById('cContinent');
+  const {ctx, w, h} = setupCanvas(el);
+  const data = D.continents;
+  const pad = {t:32, r:16, b:52, l:68};
+  const cw = w - pad.l - pad.r;
+  const ch = h - pad.t - pad.b;
+  const maxV = niceMax(data[0].v);
+  const n = data.length;
+  const slot = cw / n;
+  const bw = Math.floor(slot * 0.56);
+
+  ctx.clearRect(0, 0, w, h);
+
+  // Y grid
+  const gSteps = 4;
+  for (let i = 0; i <= gSteps; i++) {
+    const y = pad.t + ch - (i / gSteps) * ch;
+    const val = (i / gSteps) * maxV;
+    ctx.strokeStyle = i === 0 ? '#1c2d44' : 'rgba(28,45,68,0.5)';
+    ctx.lineWidth = i === 0 ? 1.5 : 0.7;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + cw, y); ctx.stroke();
+    ctx.fillStyle = '#3f5d7a';
+    ctx.font = '9.5px Consolas, monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(fmt(val), pad.l - 7, y + 3.5);
+  }
+
+  // Bars
+  data.forEach((d, i) => {
+    const x = pad.l + i * slot + (slot - bw) / 2;
+    const bh = (d.v / maxV) * ch;
+    const y = pad.t + ch - bh;
+
+    // glow
+    ctx.shadowColor = 'rgba(181,48,40,0.3)';
+    ctx.shadowBlur = 8;
+
+    // gradient fill
+    const g = ctx.createLinearGradient(x, y, x, y + bh);
+    g.addColorStop(0, '#c23530');
+    g.addColorStop(1, '#6e1a16');
+    ctx.fillStyle = g;
+    ctx.fillRect(x, y, bw, bh);
+
+    // bright top cap
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#e04545';
+    ctx.fillRect(x, y, bw, 2);
+
+    // value label above bar
+    ctx.fillStyle = '#d8e8f5';
+    ctx.font = 'bold 9px Consolas, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(fmt(d.v), x + bw/2, y - 7);
+
+    // name below
+    ctx.fillStyle = '#3f5d7a';
+    ctx.font = '10px Segoe UI, sans-serif';
+    ctx.fillText(d.n, x + bw/2, h - pad.b + 16);
+  });
+}
+
+// â”€â”€ Chart 2: Top 10 Countries (horizontal bars) â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function drawCountries() {
+  const el = document.getElementById('cCountries');
+  const {ctx, w, h} = setupCanvas(el);
+  const data = D.countries;
+  const pad = {t:8, r:72, b:16, l:126};
+  const cw = w - pad.l - pad.r;
+  const ch = h - pad.t - pad.b;
+  const maxV = niceMax(data[0].v);
+  const n = data.length;
+  const slot = ch / n;
+  const bh = Math.floor(slot * 0.54);
+
+  ctx.clearRect(0, 0, w, h);
+
+  // X grid
+  const gSteps = 4;
+  for (let i = 0; i <= gSteps; i++) {
+    const x = pad.l + (i / gSteps) * cw;
+    const val = (i / gSteps) * maxV;
+    ctx.strokeStyle = i === 0 ? '#1c2d44' : 'rgba(28,45,68,0.5)';
+    ctx.lineWidth = i === 0 ? 1.5 : 0.7;
+    ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, pad.t + ch); ctx.stroke();
+    if (i > 0) {
+      ctx.fillStyle = '#3f5d7a';
+      ctx.font = '9px Consolas, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(fmt(val), x, h - 2);
+    }
+  }
+
+  // Bars
+  data.forEach((d, i) => {
+    const y = pad.t + i * slot + (slot - bh) / 2;
+    const bw = (d.v / maxV) * cw;
+
+    // track
+    ctx.fillStyle = 'rgba(12,20,34,0.8)';
+    ctx.fillRect(pad.l, y, cw, bh);
+
+    // bar gradient
+    ctx.shadowColor = 'rgba(181,48,40,0.25)';
+    ctx.shadowBlur = 6;
+    const g = ctx.createLinearGradient(pad.l, 0, pad.l + bw, 0);
+    g.addColorStop(0, '#c23530');
+    g.addColorStop(1, '#8a2320');
+    ctx.fillStyle = g;
+    ctx.fillRect(pad.l, y, bw, bh);
+    ctx.shadowBlur = 0;
+
+    // leading cap
+    ctx.fillStyle = '#e04545';
+    ctx.fillRect(pad.l + bw - 2, y, 2, bh);
+
+    // country name
+    ctx.fillStyle = i < 3 ? '#d8e8f5' : '#7fa5c4';
+    ctx.font = i < 3 ? 'bold 11px Segoe UI, sans-serif' : '11px Segoe UI, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(d.n, pad.l - 8, y + bh/2 + 4);
+
+    // value to the right
+    ctx.fillStyle = '#d8e8f5';
+    ctx.font = '9.5px Consolas, monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(fmt(d.v), pad.l + bw + 5, y + bh/2 + 4);
+  });
+}
+
+// â”€â”€ Chart 3: Monthly area chart â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function drawMonthly() {
+  const el = document.getElementById('cMonthly');
+  const {ctx, w, h} = setupCanvas(el);
+  const data = D.monthly;
+  const pad = {t:44, r:28, b:32, l:66};
+  const cw = w - pad.l - pad.r;
+  const ch = h - pad.t - pad.b;
+  const maxV = niceMax(Math.max(...data.map(d=>d.v)));
+  const n = data.length;
+
+  function px(i) { return pad.l + (i / (n-1)) * cw; }
+  function py(v) { return pad.t + ch - (v / maxV) * ch; }
+
+  ctx.clearRect(0, 0, w, h);
+
+  // Y grid
+  const gY = 4;
+  for (let i = 0; i <= gY; i++) {
+    const y = pad.t + ch - (i / gY) * ch;
+    const val = (i / gY) * maxV;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(28,45,68,0.55)';
+    ctx.lineWidth = 0.7;
+    ctx.setLineDash([4,5]);
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l+cw, y); ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = '#3f5d7a';
+    ctx.font = '9.5px Consolas, monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(fmt(val), pad.l - 7, y + 3.5);
+  }
+
+  // Bottom axis line
+  ctx.strokeStyle = '#1c2d44';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(pad.l, pad.t + ch);
+  ctx.lineTo(pad.l + cw, pad.t + ch);
+  ctx.stroke();
+
+  // Area fill
+  ctx.beginPath();
+  ctx.moveTo(px(0), pad.t + ch);
+  for (let i = 0; i < n; i++) ctx.lineTo(px(i), py(data[i].v));
+  ctx.lineTo(px(n-1), pad.t + ch);
+  ctx.closePath();
+  const ag = ctx.createLinearGradient(0, pad.t, 0, pad.t+ch);
+  ag.addColorStop(0,   'rgba(181,48,40,0.32)');
+  ag.addColorStop(0.65,'rgba(181,48,40,0.06)');
+  ag.addColorStop(1,   'rgba(181,48,40,0)');
+  ctx.fillStyle = ag;
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  for (let i = 0; i < n; i++) {
+    if (i === 0) ctx.moveTo(px(0), py(data[0].v));
+    else ctx.lineTo(px(i), py(data[i].v));
+  }
+  ctx.strokeStyle = '#b53028';
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  // Dots
+  data.forEach((d,i) => {
+    ctx.beginPath();
+    ctx.arc(px(i), py(d.v), 3.5, 0, Math.PI*2);
+    ctx.fillStyle = '#b53028';
+    ctx.fill();
+    ctx.strokeStyle = '#d8e8f5';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  });
+
+  // X labels (every other)
+  ctx.fillStyle = '#3f5d7a';
+  ctx.font = '9px Consolas, monospace';
+  ctx.textAlign = 'center';
+  data.forEach((d,i) => {
+    if (i % 2 === 0 || i === n-1) {
+      ctx.fillText(d.m, px(i), h - 4);
+    }
+  });
+
+  // Annotations: 1st Wave, Peak, 3rd Wave
+  const anns = [
+    {i:3,  lbl:'1st Wave', dy:-1},
+    {i:12, lbl:'Peak',     dy:-1},
+    {i:15, lbl:'3rd Wave', dy:-1},
+  ];
+  anns.forEach(a => {
+    const x = px(a.i);
+    const y = py(data[a.i].v);
+    // dashed drop line
+    ctx.save();
+    ctx.strokeStyle = 'rgba(212,137,26,0.45)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3,3]);
+    ctx.beginPath();
+    ctx.moveTo(x, y - 6);
+    ctx.lineTo(x, y - 30);
+    ctx.stroke();
+    ctx.restore();
+    // label
+    ctx.fillStyle = '#d4891a';
+    ctx.font = 'bold 9px Segoe UI, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(a.lbl, x, y - 36);
+    // val label
+    ctx.fillStyle = 'rgba(216,232,245,0.6)';
+    ctx.font = '8.5px Consolas, monospace';
+    ctx.fillText(fmt(data[a.i].v), x, y - 24);
+  });
+}
+
+// â”€â”€ Death rate table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function buildTable() {
+  const maxR = Math.max(...D.cfr.map(d=>d.r));
+  const tb = document.getElementById('rateTableBody');
+  D.cfr.forEach(d => {
+    const pct = ((d.r / maxR) * 100).toFixed(1);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="country">${d.n}</td>
+      <td class="deaths">${fmtFull(d.v)}</td>
+      <td class="rate-cell">
+        <div class="rate-bar-row">
+          <span class="rate-pct">${d.r}%</span>
+          <div class="rate-track">
+            <div class="rate-fill" style="width:${pct}%"></div>
+          </div>
+        </div>
+      </td>`;
+    tb.appendChild(tr);
+  });
+}
+
+// â”€â”€ XLSX Download â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const XLSX_B64 = "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";
+
+function downloadXLSX() {
+  const btn = document.querySelector('.dl-btn');
+  const orig = btn.innerHTML;
+  btn.textContent = 'PREPARING...';
+  btn.disabled = true;
+  try {
+    const binary = atob(XLSX_B64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const blob = new Blob([bytes], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'COVID19_Dashboard_Data.xlsx';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    btn.textContent = 'DOWNLOADED âœ“';
+    setTimeout(() => { btn.innerHTML = orig; btn.disabled = false; }, 2000);
+  } catch(e) {
+    btn.innerHTML = orig;
+    btn.disabled = false;
+  }
+}
+
+// â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+
+
+// ── Continent Share of Global Deaths (donut chart) ──────────────────
+function drawDeathShare() {
+  const canvas = document.getElementById('cDeathShare');
+  if (!canvas) return;
+  const {ctx, W, H} = setupCanvas(canvas);
+
+  const data = [
+    {n:'Europe',        pct:31.97, color:'#b53028'},
+    {n:'N. America',    pct:26.66, color:'#2a7fc4'},
+    {n:'S. America',    pct:21.14, color:'#d4891a'},
+    {n:'Asia',          pct:16.36, color:'#3ab87a'},
+    {n:'Africa',        pct:3.83,  color:'#9b59b6'},
+    {n:'Oceania',       pct:0.03,  color:'#5d8aa8'},
+  ];
+
+  const cx = W / 2, cy = H * 0.46;
+  const outerR = Math.min(W, H) * 0.34;
+  const innerR = outerR * 0.52;
+  let angle = -Math.PI / 2;
+
+  // Draw slices
+  data.forEach(d => {
+    const sweep = (d.pct / 100) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, outerR, angle, angle + sweep);
+    ctx.closePath();
+    ctx.fillStyle = d.color;
+    ctx.fill();
+    ctx.strokeStyle = '#060b14';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Percentage label inside slice (only if big enough)
+    if (d.pct >= 3) {
+      const mid = angle + sweep / 2;
+      const lx  = cx + Math.cos(mid) * (outerR * 0.72);
+      const ly  = cy + Math.sin(mid) * (outerR * 0.72);
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 11px Consolas,monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(d.pct.toFixed(1) + '%', lx, ly);
+    }
+    angle += sweep;
+  });
+
+  // Donut hole
+  ctx.beginPath();
+  ctx.arc(cx, cy, innerR, 0, Math.PI * 2);
+  ctx.fillStyle = '#0c1422';
+  ctx.fill();
+
+  // Centre label
+  ctx.fillStyle = '#d8e8f5';
+  ctx.font = 'bold 13px Consolas,monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('3.18M', cx, cy - 8);
+  ctx.font = '10px Consolas,monospace';
+  ctx.fillStyle = '#7fa5c4';
+  ctx.fillText('total deaths', cx, cy + 10);
+
+  // Legend
+  const legY = cy + outerR + 18;
+  const cols  = 3;
+  const itemW = W / cols;
+  ctx.textBaseline = 'alphabetic';
+  data.forEach((d, i) => {
+    const lx = (i % cols) * itemW + 12;
+    const ly = legY + Math.floor(i / cols) * 18;
+    ctx.fillStyle = d.color;
+    ctx.fillRect(lx, ly, 10, 10);
+    ctx.fillStyle = '#7fa5c4';
+    ctx.font = '10px Consolas,monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(d.n, lx + 14, ly + 9);
+  });
+}
+
+// ── Country CFR horizontal bar chart ────────────────────────────────
+function drawCFR() {
+  const canvas = document.getElementById('cCFR');
+  if (!canvas) return;
+  const {ctx, W, H} = setupCanvas(canvas);
+
+  const data = [
+    {n:'Mexico',         cfr:9.25},
+    {n:'Italy',          cfr:3.00},
+    {n:'United Kingdom', cfr:2.88},
+    {n:'Brazil',         cfr:2.75},
+    {n:'Germany',        cfr:2.44},
+    {n:'Russia',         cfr:2.28},
+    {n:'Spain',          cfr:2.22},
+    {n:'France',         cfr:1.84},
+    {n:'United States',  cfr:1.78},
+    {n:'India',          cfr:1.11},
+  ];
+
+  const PAD = {top:24, right:56, bottom:16, left:118};
+  const cW = W - PAD.left - PAD.right;
+  const cH = H - PAD.top  - PAD.bottom;
+  const barH = Math.floor(cH / data.length) - 5;
+  const maxCFR = 10;
+
+  ctx.save();
+  ctx.translate(PAD.left, PAD.top);
+
+  // Grid lines
+  for (let i = 1; i <= 5; i++) {
+    const x = (i / 5) * cW;
+    ctx.strokeStyle = 'rgba(28,45,68,0.55)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, cH); ctx.stroke();
+    ctx.fillStyle = '#3f5d7a';
+    ctx.font = '9px Consolas,monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText((i * 2) + '%', x, cH + 12);
+  }
+
+  data.forEach((d, i) => {
+    const y    = i * (barH + 5);
+    const barW = (d.cfr / maxCFR) * cW;
+
+    // Gradient bar
+    const grad = ctx.createLinearGradient(0, 0, barW, 0);
+    grad.addColorStop(0, d.cfr >= 5 ? '#b53028' : '#d4891a');
+    grad.addColorStop(1, d.cfr >= 5 ? 'rgba(181,48,40,0.4)' : 'rgba(212,137,26,0.4)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, y, barW, barH);
+
+    // Country label
+    ctx.fillStyle = '#d8e8f5';
+    ctx.font = '11px Consolas,monospace';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(d.n, -6, y + barH / 2);
+
+    // CFR value label
+    ctx.fillStyle = '#d8e8f5';
+    ctx.font = 'bold 10px Consolas,monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(d.cfr.toFixed(2) + '%', barW + 4, y + barH / 2);
+  });
+
+  ctx.restore();
+}
+// ── Country Cases vs Deaths (grouped bar, dual axis) ──────────────
+function drawCountryCases() {
+  const canvas = document.getElementById('cCountryCases');
+  if (!canvas) return;
+  const {ctx, W, H} = setupCanvas(canvas);
+
+  const countries = [
+    {n:'United States',  cases:32346971, deaths:576232},
+    {n:'Brazil',         cases:14659011, deaths:403781},
+    {n:'Mexico',         cases:2344755,  deaths:216907},
+    {n:'India',          cases:19164969, deaths:211853},
+    {n:'United Kingdom', cases:4432246,  deaths:127775},
+    {n:'Italy',          cases:4022653,  deaths:120807},
+    {n:'Russia',         cases:4750755,  deaths:108290},
+    {n:'France',         cases:5677835,  deaths:104675},
+    {n:'Germany',        cases:3405365,  deaths:83097},
+    {n:'Spain',          cases:3524077,  deaths:78216},
+  ];
+
+  const PAD = {top:40, right:82, bottom:62, left:76};
+  const cW = W - PAD.left - PAD.right;
+  const cH = H - PAD.top  - PAD.bottom;
+  const n  = countries.length;
+  const groupW = cW / n;
+  const barW   = Math.min(groupW * 0.32, 28);
+  const gap    = barW * 0.3;
+
+  const maxCases  = Math.max(...countries.map(d => d.cases));
+  const maxDeaths = Math.max(...countries.map(d => d.deaths));
+
+  function scaleC(v) { return cH - (v / maxCases)  * cH; }
+  function scaleD(v) { return cH - (v / maxDeaths) * cH; }
+  function fmt(v) {
+    if (v >= 1e6) return (v/1e6).toFixed(1)+'M';
+    if (v >= 1e3) return (v/1e3).toFixed(0)+'K';
+    return v;
+  }
+
+  ctx.save();
+  ctx.translate(PAD.left, PAD.top);
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(28,45,68,0.55)';
+  ctx.lineWidth = 1;
+  for (let i = 1; i <= 5; i++) {
+    const y = cH - (i/5) * cH;
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(cW,y); ctx.stroke();
+  }
+
+  countries.forEach((d, i) => {
+    const cx = i * groupW + groupW / 2;
+
+    // Cases bar (blue)
+    const cx1 = cx - gap/2 - barW;
+    const gradC = ctx.createLinearGradient(0, scaleC(d.cases), 0, cH);
+    gradC.addColorStop(0, '#2a7fc4');
+    gradC.addColorStop(1, 'rgba(42,127,196,0.25)');
+    ctx.fillStyle = gradC;
+    ctx.fillRect(cx1, scaleC(d.cases), barW, cH - scaleC(d.cases));
+
+    // Deaths bar (crimson)
+    const cx2 = cx + gap/2;
+    const gradD = ctx.createLinearGradient(0, scaleD(d.deaths), 0, cH);
+    gradD.addColorStop(0, '#b53028');
+    gradD.addColorStop(1, 'rgba(181,48,40,0.25)');
+    ctx.fillStyle = gradD;
+    ctx.fillRect(cx2, scaleD(d.deaths), barW, cH - scaleD(d.deaths));
+
+    // Value labels
+    ctx.font = 'bold 8px Consolas,monospace';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#7fa5c4';
+    ctx.fillText(fmt(d.cases),  cx1 + barW/2, scaleC(d.cases)  - 4);
+    ctx.fillStyle = '#d4891a';
+    ctx.fillText(fmt(d.deaths), cx2 + barW/2, scaleD(d.deaths) - 4);
+
+    // Country label (rotated)
+    ctx.save();
+    ctx.translate(cx, cH + 8);
+    ctx.rotate(-Math.PI / 4);
+    ctx.fillStyle = '#7fa5c4';
+    ctx.font = '10px Consolas,monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(d.n, 0, 0);
+    ctx.restore();
+  });
+
+  // Left Y-axis label (Cases)
+  ctx.save();
+  ctx.rotate(-Math.PI/2);
+  ctx.fillStyle = '#2a7fc4';
+  ctx.font = 'bold 10px Consolas,monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('Total Cases', -cH/2, -58);
+  ctx.restore();
+
+  // Right Y-axis label (Deaths)
+  ctx.save();
+  ctx.translate(cW, 0);
+  ctx.rotate(-Math.PI/2);
+  ctx.fillStyle = '#b53028';
+  ctx.font = 'bold 10px Consolas,monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('Total Deaths', -cH/2, 64);
+  ctx.restore();
+
+  // Right Y-axis ticks
+  for (let i = 1; i <= 5; i++) {
+    const y = cH - (i/5)*cH;
+    ctx.fillStyle = '#b53028';
+    ctx.font = '9px Consolas,monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(fmt(Math.round((i/5)*maxDeaths)), cW+4, y+3);
+  }
+
+  // Left Y-axis ticks
+  for (let i = 1; i <= 5; i++) {
+    const y = cH - (i/5)*cH;
+    ctx.fillStyle = '#2a7fc4';
+    ctx.font = '9px Consolas,monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(fmt(Math.round((i/5)*maxCases)), -4, y+3);
+  }
+
+  // Legend
+  const ly = -26;
+  ctx.fillStyle = '#2a7fc4'; ctx.fillRect(cW/2 - 80, ly, 12, 10);
+  ctx.fillStyle = '#7fa5c4'; ctx.font = '10px Consolas,monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('Total Cases', cW/2 - 64, ly+9);
+  ctx.fillStyle = '#b53028'; ctx.fillRect(cW/2 + 30, ly, 12, 10);
+  ctx.fillStyle = '#7fa5c4';
+  ctx.fillText('Total Deaths', cW/2 + 46, ly+9);
+
+  ctx.restore();
+}
+// ── Cases vs Deaths by Continent (grouped bar, dual axis) ───────────
+function drawCasesDeath() {
+  const canvas = document.getElementById('cCasesDeath');
+  if (!canvas) return;
+  const {ctx, W, H} = setupCanvas(canvas);
+
+  const continents = [
+    {n:'Africa',        cases:4557699,  deaths:121784},
+    {n:'Asia',          cases:39526308, deaths:520286},
+    {n:'Europe',        cases:44863478, deaths:1016750},
+    {n:'N. America',    cases:37529488, deaths:847942},
+    {n:'Oceania',       cases:43570,    deaths:1046},
+    {n:'S. America',    cases:24878216, deaths:672415},
+  ];
+
+  const PAD = {top:36, right:80, bottom:56, left:72};
+  const cW = W - PAD.left - PAD.right;
+  const cH = H - PAD.top  - PAD.bottom;
+  const n  = continents.length;
+  const groupW = cW / n;
+  const barW   = Math.min(groupW * 0.34, 36);
+  const gap    = barW * 0.35;
+
+  const maxCases  = Math.max(...continents.map(d => d.cases));
+  const maxDeaths = Math.max(...continents.map(d => d.deaths));
+
+  function scaleC(v) { return cH - (v / maxCases)  * cH; }
+  function scaleD(v) { return cH - (v / maxDeaths) * cH; }
+  function fmt(v) {
+    if (v >= 1e6) return (v/1e6).toFixed(1)+'M';
+    if (v >= 1e3) return (v/1e3).toFixed(0)+'K';
+    return v;
+  }
+
+  ctx.save();
+  ctx.translate(PAD.left, PAD.top);
+
+  // ── Grid lines (5 lines, primary axis) ──
+  ctx.strokeStyle = 'rgba(28,45,68,0.55)';
+  ctx.lineWidth = 1;
+  for (let i = 1; i <= 5; i++) {
+    const y = cH - (i / 5) * cH;
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(cW, y); ctx.stroke();
+  }
+
+  // ── Bars ──
+  continents.forEach((d, i) => {
+    const cx = i * groupW + groupW / 2;
+
+    // Cases bar (blue, primary axis)
+    const ch = cH - scaleC(d.cases);
+    const cx1 = cx - gap/2 - barW;
+    const gradC = ctx.createLinearGradient(0, scaleC(d.cases), 0, cH);
+    gradC.addColorStop(0, '#2a7fc4');
+    gradC.addColorStop(1, 'rgba(42,127,196,0.3)');
+    ctx.fillStyle = gradC;
+    ctx.fillRect(cx1, scaleC(d.cases), barW, ch);
+
+    // Deaths bar (crimson, secondary axis)
+    const dh = cH - scaleD(d.deaths);
+    const cx2 = cx + gap/2;
+    const gradD = ctx.createLinearGradient(0, scaleD(d.deaths), 0, cH);
+    gradD.addColorStop(0, '#b53028');
+    gradD.addColorStop(1, 'rgba(181,48,40,0.3)');
+    ctx.fillStyle = gradD;
+    ctx.fillRect(cx2, scaleD(d.deaths), barW, dh);
+
+    // Value label — cases
+    ctx.fillStyle = '#7fa5c4';
+    ctx.font = `bold 9px Consolas,monospace`;
+    ctx.textAlign = 'center';
+    ctx.fillText(fmt(d.cases), cx1 + barW/2, scaleC(d.cases) - 4);
+
+    // Value label — deaths
+    ctx.fillStyle = '#d4891a';
+    ctx.fillText(fmt(d.deaths), cx2 + barW/2, scaleD(d.deaths) - 4);
+
+    // Continent label
+    ctx.fillStyle = '#7fa5c4';
+    ctx.font = `11px Consolas,monospace`;
+    ctx.textAlign = 'center';
+    ctx.fillText(d.n, cx, cH + 16);
+  });
+
+  // ── Left Y-axis label (Cases) ──
+  ctx.save();
+  ctx.rotate(-Math.PI/2);
+  ctx.fillStyle = '#2a7fc4';
+  ctx.font = 'bold 10px Consolas,monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('Total Cases', -cH/2, -54);
+  ctx.restore();
+
+  // ── Right Y-axis label (Deaths) ──
+  ctx.save();
+  ctx.translate(cW, 0);
+  ctx.rotate(-Math.PI/2);
+  ctx.fillStyle = '#b53028';
+  ctx.font = 'bold 10px Consolas,monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('Total Deaths', -cH/2, 62);
+  ctx.restore();
+
+  // ── Right Y-axis ticks ──
+  ctx.strokeStyle = 'rgba(181,48,40,0.25)';
+  ctx.lineWidth = 1;
+  for (let i = 1; i <= 5; i++) {
+    const y = cH - (i/5) * cH;
+    const val = fmt(Math.round((i/5) * maxDeaths));
+    ctx.fillStyle = '#b53028';
+    ctx.font = '9px Consolas,monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(val, cW + 4, y + 3);
+  }
+
+  // ── Left Y-axis ticks ──
+  for (let i = 1; i <= 5; i++) {
+    const y = cH - (i/5) * cH;
+    const val = fmt(Math.round((i/5) * maxCases));
+    ctx.fillStyle = '#2a7fc4';
+    ctx.font = '9px Consolas,monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(val, -4, y + 3);
+  }
+
+  // ── Legend ──
+  const ly = -22;
+  ctx.fillStyle = '#2a7fc4'; ctx.fillRect(cW/2 - 80, ly, 12, 10);
+  ctx.fillStyle = '#7fa5c4'; ctx.font = '10px Consolas,monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('Total Cases', cW/2 - 64, ly + 9);
+  ctx.fillStyle = '#b53028'; ctx.fillRect(cW/2 + 30, ly, 12, 10);
+  ctx.fillStyle = '#7fa5c4';
+  ctx.fillText('Total Deaths', cW/2 + 46, ly + 9);
+
+  ctx.restore();
+}
+function init() {
+  buildTable();
+  drawContinent();
+  drawCountries();
+  drawDeathShare();
+  drawCFR();
+  drawCasesDeath();
+  drawCountryCases();
+  drawMonthly();
+}
+
+window.addEventListener('load', init);
+window.addEventListener('resize', () => {
+  drawContinent();
+  drawCountries();
+  drawDeathShare();
+  drawCFR();
+  drawCasesDeath();
+  drawCountryCases();
+  drawMonthly();
+});
+</script>
