@@ -1,6 +1,6 @@
 # COVID-19 Mortality Analysis Dashboard
 
-An interactive data dashboard analysing COVID-19 death cases globally from **January 2020 to April 2021**, built with vanilla HTML, CSS, and Canvas 2D — no external libraries or CDN dependencies.
+An image-based data dashboard analysing COVID-19 death cases globally from **January 2020 to April 2021**, built with vanilla HTML & CSS — charts exported directly from Microsoft Excel.
 
 ## Live Demo
 
@@ -8,23 +8,53 @@ Open `index.html` in any browser or view the hosted version on GitHub Pages.
 
 ## Features
 
-- **7 interactive charts** rendered with the native Canvas 2D API
-- Deaths by continent (bar chart)
-- Top 10 countries by total deaths (horizontal bar)
-- Continent share of global deaths (donut chart)
-- Case Fatality Rate (CFR) by country (horizontal bar)
-- Total cases vs total deaths by continent (dual-axis grouped bar)
-- Top 10 countries — total cases vs total deaths (dual-axis grouped bar)
-- Monthly global death toll Jan 2020 – Apr 2021 (area + line chart)
-- KPI cards: total deaths, CFR, worst-affected country
-- Case Fatality Rate league table
-- Key insights panel
-- Downloadable Excel workbook (`COVID19_Dashboard_Data.xlsx`) with 8 sheets and embedded charts
+- **12 Excel charts** across 3 analysis sheets, embedded as high-quality PNG images
+- KPI cards: total global deaths, CFR, worst-affected continent, worst month
+- Monthly trend, continent vs country breakdowns, CFR league table, death-share analysis
+- Responsive dark-navy layout — no external libraries, no CDN
+
+## Dashboard Sections
+
+### Chart 1 — Full Overview (6 charts)
+| # | Chart |
+|---|---|
+| 1 | Monthly Trend — New Deaths per Month |
+| 2 | Continent: Total Cases vs Total Deaths |
+| 3 | Top 10 Countries: Total Cases vs Total Deaths |
+| 4 | Total Deaths by Continent |
+| 5 | Continent Share of Global Deaths |
+| 6 | Case Fatality Rate (CFR) — Top 10 Countries |
+
+### Chart 2 — Trend & Country Analysis (3 charts)
+| # | Chart |
+|---|---|
+| 1 | Monthly Trend — New Deaths per Month |
+| 2 | Top 10 Countries: Total Cases vs Total Deaths |
+| 3 | Total Deaths by Continent |
+
+### Chart 3 — CFR & Continent Deep Dive (3 charts)
+| # | Chart |
+|---|---|
+| 1 | Case Fatality Rate (CFR) — Top 10 Countries |
+| 2 | Continent: Total Cases vs Total Deaths |
+| 3 | Continent Share of Global Deaths (Donut) |
 
 ## Dataset
 
 Source: [Our World in Data — COVID-19 Deaths](https://ourworldindata.org/covid-deaths)  
-Rows: 85,172 | Columns: 59 | Period: 24 Feb 2020 – 30 Apr 2021
+Rows: 85,172 | Columns: 59 | Period: Jan 2020 – Apr 2021
+
+## Key Findings
+
+| Metric | Value |
+|---|---|
+| Global Deaths | 3,180,223 |
+| Global Cases | 151,376,060 |
+| Global CFR | 2.10% |
+| Deadliest Continent | Europe (1,016,750 deaths, 31.97%) |
+| Deadliest Country | United States (576,232 deaths) |
+| Highest CFR | Mexico (9.25%) |
+| Worst Month | January 2021 (411,021 deaths) |
 
 ## Tech Stack
 
@@ -32,8 +62,7 @@ Rows: 85,172 | Columns: 59 | Period: 24 Feb 2020 – 30 Apr 2021
 |---|---|
 | Markup | HTML5 |
 | Styling | CSS3 (custom properties, flexbox, grid) |
-| Charts | Canvas 2D API (no Chart.js, no D3) |
-| Data export | Blob + createObjectURL → .xlsx |
+| Charts | Microsoft Excel (exported as PNG) |
 | Data source | Microsoft Excel (.xlsx) via Power Query |
 
 ## Power Query (M Language) — Key Transformations
@@ -63,19 +92,6 @@ let
 in
     Sorted
 ```
-
-## Excel Workbook Sheets
-
-| Sheet | Contents |
-|---|---|
-| Summary | Global totals and KPIs |
-| By Continent | Deaths per continent |
-| Top 10 Countries | Highest-death countries |
-| Monthly Trend | Month-by-month global deaths + chart |
-| Continent Analysis | Cases + Deaths per continent + dual-axis chart |
-| Country Analysis | Cases + Deaths per country + dual-axis chart |
-| Global Death Share | Continent % share + pie chart + bar chart |
-| Country CFR | CFR per country + horizontal bar chart |
 
 ## Author
 
